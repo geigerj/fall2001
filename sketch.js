@@ -1,0 +1,102 @@
+let img_graphics;
+let water;
+let last_pos = 0;
+let pos = 0;
+let displacementMag = 0;
+let poems = [];
+
+async function preload(){
+  waterShader = loadShader('shader.vert', 'shader.frag');
+  water = createVideo(
+    ["media/waves.mp4"],
+    async function() {
+      try {
+        water.hide();
+        water.volume(0);
+        water.loop();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  )
+  water.size(window.innerWidth, window.innerHeight);
+  poems = await loadPoems();
+}
+
+function setup() {
+  // See https://www.khronos.org/webgl/wiki/HandlingContextLost
+  // TODO: WebGL still crashes often... recovery isn't working?
+  var canvas = document.getElementById("defaultCanvas0");
+  canvas.addEventListener("webglcontextlost", function(event) {
+    event.preventDefault();
+}, false);
+  canvas.addEventListener(
+    "webglcontextrestored", function() {preload(); setup();}, false);
+    
+
+  background(0);
+  createCanvas(window.innerWidth, window.innerHeight, WEBGL);
+  
+  img_graphics = createGraphics(window.innerWidth, window.innerHeight * 4);
+
+  img_graphics.fill(255);
+  img_graphics.textSize(70);
+  img_graphics.textFont("Arial");
+  img_graphics.textAlign(CENTER);
+  img_graphics.noStroke();
+  img_graphics.text('fall 2001', 0.3 * window.innerWidth, 0.8 * window.innerHeight);
+  
+  img_graphics.text
+  
+  pixelDensity(1);
+  frameRate(36);
+  
+}
+
+function draw() {
+  displacementMag *= 0.99;
+  
+  scaled_pos = pos % 620;
+  
+  shader(waterShader);
+  waterShader.setUniform("horror", img_graphics.get(100*sin(pos * 0.06),scaled_pos + 100*sin(pos * 0.08),window.innerWidth, window.innerHeight));
+  waterShader.setUniform("displacement", water);
+  waterShader.setUniform('time', pos);
+  waterShader.setUniform('displacementMult', displacementMag * (scaled_pos * scaled_pos + 1000) * 0.0003);
+  
+  rect(0,0,width,height);
+}
+
+function mousePressed() {
+  begin = true;
+}
+
+function mouseWheel(event) {
+  pos += event.delta / 4;
+  pos = max(pos, 0);
+  displacementMag = 1;
+  if (pos - last_pos > 620) {
+    fetchPoem();
+    last_pos = pos;
+  }
+}
+
+async function loadPoems() {
+    const response = await fetch('poems.txt');
+    const data = await response.text();
+    return data.split("<><><>>>>>>>><<<<<<<<><><>")
+      .map((a) => ({sort: Math.random(), value: a}))
+      .sort((a, b) => a.sort - b.sort)
+      .map((a) => a.value);
+}
+
+function fetchPoem() {
+  img_graphics.background(0);
+  let txt = poems.pop();
+  console.log(txt);
+  
+  img_graphics.textSize(20);
+  
+  img_graphics.textAlign(LEFT);
+  img_graphics.text(txt, 0.6 * window.innerWidth, 0.8 * window.innerHeight);
+}
