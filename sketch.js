@@ -1,9 +1,42 @@
 let img_graphics;
 let water;
-let last_pos = 0;
+let last_fetch_pos = 0;
+let last_play_pos = 0;
 let pos = 0;
 let displacementMag = 0;
+let last_played = 0;
 let poems = [];
+let notes = [{}]
+
+const soundtrack = {
+  1: [1, 6],
+  2: [4],
+  3: [3],
+  4: [2, 3],
+  5: [4],
+  6: [6],
+  7: [2, 6],
+  8: [9],
+  9: [9],
+  10: [1, 10],
+  11: [6],
+  12: [4],
+  13: [3],
+  14: [],
+  15: [],
+  16: [2, 4],
+  17: [8],
+  18: [6],
+  19: [3, 6],
+  20: [9],
+  21: [8],
+  22: [2, 5],
+  23: [3, 7],
+  24: [7],
+  25: [3, 8],
+  26: [2],
+  27: [1]
+}
 
 async function preload(){
   waterShader = loadShader('shader.vert', 'shader.frag');
@@ -19,6 +52,17 @@ async function preload(){
       }
     }
   )
+  
+  notes.push(loadSound('media/C.mp3')); //1
+  notes.push(loadSound('media/D.mp3')); //2
+  notes.push(loadSound('media/E.mp3')); //3
+  notes.push(loadSound('media/F.mp3')); //4
+  notes.push(loadSound('media/Fs.mp3')); //5
+  notes.push(loadSound('media/G.mp3')); //6
+  notes.push(loadSound('media/Gs.mp3')); //7
+  notes.push(loadSound('media/A.mp3')); //8
+  notes.push(loadSound('media/B.mp3')); //9
+  notes.push(loadSound('media/C2.mp3')); //10
   water.size(window.innerWidth, window.innerHeight);
   poems = await loadPoems();
 }
@@ -54,7 +98,7 @@ function setup() {
 }
 
 function draw() {
-  displacementMag *= 0.99;
+  displacementMag *= 0.985;
   
   scaled_pos = pos % 620;
   
@@ -75,9 +119,13 @@ function mouseWheel(event) {
   pos += event.delta / 4;
   pos = max(pos, 0);
   displacementMag = 1;
-  if (pos - last_pos > 620) {
+  if (pos - last_fetch_pos > 620) {
     fetchPoem();
-    last_pos = pos;
+    last_fetch_pos = pos;
+  }
+  if (pos - last_play_pos > 130) {
+    playNext();
+    last_play_pos = pos;
   }
 }
 
@@ -99,4 +147,13 @@ function fetchPoem() {
   
   img_graphics.textAlign(LEFT);
   img_graphics.text(txt, 0.6 * window.innerWidth, 0.8 * window.innerHeight);
+}
+
+function playNext() {
+  let to_play = soundtrack[last_played % 27 + 1];
+  for(let i = 0; i < to_play.length; i++) {
+    console.log("play idx ", i, ": ", to_play[i]);
+    notes[to_play[i]].play();
+  }
+  last_played++;
 }
