@@ -145,7 +145,6 @@ async function loadPoems() {
 function fetchPoem() {
   img_graphics.background(0);
   let txt = poems.pop();
-  console.log(txt);
   
   img_graphics.textSize(20);
   
@@ -156,7 +155,6 @@ function fetchPoem() {
 function playNext() {
   let to_play = soundtrack[last_played % 27 + 1];
   for(let i = 0; i < to_play.length; i++) {
-    console.log("play idx ", i, ": ", to_play[i]);
     notes[to_play[i]].play();
   }
   last_played++;
