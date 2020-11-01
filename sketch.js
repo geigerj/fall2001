@@ -96,7 +96,7 @@ function setup() {
   
   
   pixelDensity(1);
-  frameRate(36);
+  frameRate(30);
 }
 
 function draw() {
