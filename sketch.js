@@ -7,6 +7,7 @@ let displacementMag = 0;
 let last_played = 0;
 let poems = [];
 let notes = [{}]
+let clicked = false;
 
 const soundtrack = {
   1: [1, 6],
@@ -90,14 +91,16 @@ function setup() {
   img_graphics.noStroke();
   img_graphics.text('fall 2001', 0.3 * window.innerWidth, 0.8 * window.innerHeight);
   
-  img_graphics.text
+  img_graphics.textSize(18);
+  img_graphics.text('click, then scroll to begin', 0.3 * window.innerWidth, 0.9 * window.innerHeight);
+  
   
   pixelDensity(1);
   frameRate(36);
-  
 }
 
 function draw() {
+  
   displacementMag *= 0.985;
   
   scaled_pos = pos % 620;
@@ -112,12 +115,13 @@ function draw() {
 }
 
 function mousePressed() {
-  begin = true;
+  clicked = true;
 }
 
 function mouseWheel(event) {
+  if (event.delta < 0 || !clicked)
+    return;
   pos += event.delta / 4;
-  pos = max(pos, 0);
   displacementMag = 1;
   if (pos - last_fetch_pos > 620) {
     fetchPoem();
