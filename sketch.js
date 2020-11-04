@@ -3,6 +3,7 @@ let water;
 let last_fetch_pos = 0;
 let last_play_pos = 0;
 let pos = 0;
+let local_poem_pos = 0;
 let displacementMag = 0;
 let last_played = 0;
 let poems = [];
@@ -104,7 +105,6 @@ function setup() {
 
 function draw() {
   displacementMag *= 0.985;
-  scaled_pos = pos % 620;
 
   shader(waterShader);
 
@@ -113,14 +113,14 @@ function draw() {
   tmp_graphics.background(0);
   tmp_graphics.image(img_graphics.get(
     100*sin(pos * 0.06),
-    scaled_pos + 100*sin(pos * 0.08),
+    local_poem_pos + 100*sin(pos * 0.08),
     window.innerWidth,
     window.innerHeight), 0, 0);
 
   waterShader.setUniform("horror", tmp_graphics);
   waterShader.setUniform("displacement", water);
   waterShader.setUniform('time', pos);
-  waterShader.setUniform('displacementMult', displacementMag * (scaled_pos * scaled_pos + 1000) * 0.0003);
+  waterShader.setUniform('displacementMult', displacementMag * (local_poem_pos * local_poem_pos + 1000) * 0.0003);
 
   rect(0,0,width,height);
 }
@@ -136,11 +136,13 @@ function mouseWheel(event) {
     return;
 
   pos += event.delta / 5;
+  local_poem_pos += event.delta / 5;
   displacementMag = 1;
   // New poem every 620 px
   if (pos - last_fetch_pos > 620) {
     fetchPoem();
     last_fetch_pos = pos;
+    local_poem_pos = 0;
   }
   // New soundtrack beat every 130px
   if (pos - last_play_pos > 130) {
